@@ -48,6 +48,6 @@ En este caso como no tenemos interfaces, no se aplica este principio.
 #### Dependency Inversion Principle
 Este principio nos dice que debemos depender de abstracciones y no de clases concretas.
 
-En este caso, dependemos de spotifyTrackService y SpotifySqlDBImpl.**
+En este caso, dependemos de spotifyTrackService y SpotifySqlDBImpl.
 
 
