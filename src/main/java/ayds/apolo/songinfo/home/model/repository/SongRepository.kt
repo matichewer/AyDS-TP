@@ -1,12 +1,14 @@
 package ayds.apolo.songinfo.home.model.repository
 
 import ayds.apolo.songinfo.home.model.entities.EmptySong
-import ayds.apolo.songinfo.home.model.entities.SearchResult
+import ayds.apolo.songinfo.home.model.entities.Song
 import ayds.apolo.songinfo.home.model.entities.SpotifySong
 import ayds.apolo.songinfo.home.model.repository.external.spotify.SpotifyModule
+import ayds.apolo.songinfo.home.model.repository.local.spotify.SpotifyLocalStorage
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.ResultSetToSpotifySongMapperImpl
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlDBImpl
 import ayds.apolo.songinfo.home.model.repository.local.spotify.sqldb.SpotifySqlQueriesImpl
+import ayds.apolo.songinfo.home.model.repository.local.spotify.cache.SongCache
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Response
@@ -15,14 +17,23 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.IOException
 
 
-class SongRepository {
+interface SongRepository {
+    fun getSongByTerm(term: String): Song
+}
 
-    internal val sls = SpotifySqlDBImpl(
+
+internal class SongRepositoryImp (
+    private val songCache: SongCache,
+    private val songLocalStorage: SpotifyLocalStorage
+){
+
+
+
+    internal val spotifyDB = SpotifySqlDBImpl(
         SpotifySqlQueriesImpl(), ResultSetToSpotifySongMapperImpl()
     )
-    val sts = SpotifyModule.spotifyTrackService
+    val spotifyTrackService = SpotifyModule.spotifyTrackService
 
-    val theCache = mutableMapOf<String, SpotifySong>()
 
     ///// Wiki
     var retrofit: Retrofit? = Retrofit.Builder()
@@ -34,30 +45,25 @@ class SongRepository {
     //// end wiki
 
     fun getSongByTerm(term: String): SearchResult {
-        var s: SpotifySong?
 
-        // check in the cache
-        s = theCache[term]
-        if (s != null) {
-            s.isCacheStored = true
-            return s
-        }
-
-        // check in the DB
-        s = sls.getSongByTerm(term)
-        if (s != null) {
-            s.isLocallyStored = true
-            // update the cache
-            theCache[term] = s
-            return s
-        }
-
-        // the service
-        s = sts.getSong(term)
-        if (s != null) {
-            sls.insertSong(term, s)
-            return s
-        }
+            var spotifySong: SpotifySong? = songCache.getSongByTerm(term)
+        if (spotifySong != null) {
+            spotifySong.isCacheStored = true
+            return spotifySong
+        } else {
+            spotifySong = spotifyDB.getSongByTerm(term)
+            if (spotifySong != null) {
+                spotifySong.isLocallyStored = true
+                // update the cache
+                cache[term] = spotifySong
+                return spotifySong
+            } else {
+                spotifySong = spotifyTrackService.getSong(term)
+                if (spotifySong != null) {
+                    spotifyDB.insertSong(term, spotifySong)
+                    return spotifySong
+                }
+            }
 
         /////// Last chance, get anything from the wiki
         val callResponse: Response<String>
@@ -77,5 +83,10 @@ class SongRepository {
         }
 
         return EmptySong
+    }
+
+    private fun getSongFromCache(term: String): SpotifySong? {
+        val spotifySong: SpotifySong? = cache[term]
+        return spotifySong
     }
 }
