@@ -1,6 +1,4 @@
-**# AyDS-TP
-
-Arquitectura y Diseño de Sistemas
+# Arquitectura y Diseño de Sistemas
 
 ## TP General
 
@@ -13,11 +11,11 @@ Arquitectura y Diseño de Sistemas
 3 - La arquitectura del proyecto, cumple con MVC? Justificar.
 
 
-# Solucion
+## Solucion
 
-## Ejercicio 1
+### Ejercicio 1
 
-### Single Responsibility Principle:
+#### Single Responsibility Principle:
 No se cumple porque no tiene 1 sola responsabilidad.
 No se cumple ni a nivel de clase ni a nivel de funcion, ya que
 tiene más de una responsabilidad.
@@ -29,25 +27,25 @@ A nivel de función no lo cumple porque no tiene el mismo nivel de abstracción
 
 Se puede solucionar creando mas funciones, modularizar, aplicar clean code
 
-### Open/Closed Principle
+#### Open/Closed Principle
 La clase no cumple con este principio.
 Si queremos modificar un servicio, hay que modificar la clase.
 Y si quisieramos agregar otro servicio, tambien hay que modificar la clase.
 
 Se puede solucionar implementando el patrón de diseño Broker
 
-### Liskov Substitution Principle
+#### Liskov Substitution Principle
 Este principio nos dice que las subclases deberian poder ser sustituidas
 por sus clases bases.
 En este caso, no tenemos subclases.
 
-### Interface Segregation Principle
+#### Interface Segregation Principle
 Este principio nos dice que es mejor tener muchas interfaces especificas,
 en vez de tener una sola de propósito general.
 
 En este caso como no tenemos interfaces, no se aplica este principio.
 
-### Dependency Inversion Principle
+#### Dependency Inversion Principle
 Este principio nos dice que debemos depender de abstracciones y no de clases concretas.
 
 En este caso, dependemos de spotifyTrackService y SpotifySqlDBImpl.**
